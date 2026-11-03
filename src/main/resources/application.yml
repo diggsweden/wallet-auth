@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2026 Digg - Agency for Digital Government
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+server:
+  port: 9000
+spring:
+  application:
+    name: wallet-auth
+
+wallet:
+  authorization-server:
+    # EC P-256 private JWK (JSON) used to sign access tokens.
+    # When empty, an ephemeral key is generated at startup (dev/test only).
+    signing-key: ${SIGNING_KEY:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

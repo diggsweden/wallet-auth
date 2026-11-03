@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2026 Digg - Agency for Digital Government
+#
+# SPDX-License-Identifier: CC0-1.0
+
+# Tool versions for mise (https://mise.jdx.dev/)
+# Install all tools: mise install
+# Activate in shell: eval "$(mise activate bash)"
+
+[settings]
+experimental = true  # Enable experimental features (required for ubi backend)
+#lockfile = true      # Enable lockfile with checksum verification for all downloads not avail yet
+paranoid = true      # Enable strict security checks and verification
+
+[env]
+# These will be available during tool installation AND runtime
+HTTP_PROXY = "{{ get_env(name='HTTP_PROXY', default='') }}"
+HTTPS_PROXY = "{{ get_env(name='HTTPS_PROXY', default='') }}"
+NO_PROXY = "{{ get_env(name='NO_PROXY', default='') }}"
+http_proxy = "{{ get_env(name='http_proxy', default='') }}"
+https_proxy = "{{ get_env(name='https_proxy', default='') }}"
+no_proxy = "{{ get_env(name='no_proxy', default='') }}"
+
+# Pip/pipx configuration
+PIP_INDEX_URL = "{{ get_env(name='PIP_INDEX_URL', default='') }}"
+
+[tools]
+java = "temurin-25"
+# Maven Central instead of archive.apache.org, which throttles CI runners.
+"http:maven" = { version = "3.9.16", url = "https://repo1.maven.org/maven2/org/apache/maven/apache-maven/{{ version }}/apache-maven-{{ version }}-bin.tar.gz", strip_components = 1, checksum = "sha512:831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6" }
+"aqua:casey/just" = "1.43.1"
+"aqua:rvben/rumdl" = "v0.0.185"
+"aqua:google/yamlfmt" = "v0.20.0"
+"aqua:rhysd/actionlint" = "v1.7.9"
+"aqua:zricethezav/gitleaks" = "v8.30.0"
+"forgejo:itiquette/gommitlint" = "0.9.10"
+"github:italia/publiccode-parser-go" = "v5.2.3"
+"pipx:reuse" = "6.2.0"
+"aqua:koalaman/shellcheck" = "v0.10.0"
+"aqua:mvdan/sh" = "v3.11.0"  # shfmt

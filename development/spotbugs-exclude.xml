@@ -1,0 +1,11 @@
+<!--
+SPDX-FileCopyrightText: 2026 Digg - Agency for Digital Government
+SPDX-License-Identifier: CC0-1.0
+-->
+<FindBugsFilter>
+    <!-- Spring beans injected through the constructor are shared on purpose -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Class name="se.digg.wallet.authorizationserver.application.DeviceKeyGrantAuthenticationProvider"/>
+    </Match>
+</FindBugsFilter>
