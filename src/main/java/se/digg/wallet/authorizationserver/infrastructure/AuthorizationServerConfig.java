@@ -14,7 +14,6 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import java.text.ParseException;
-import java.time.Duration;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,16 +21,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
-import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
@@ -39,9 +34,6 @@ import org.springframework.util.StringUtils;
 
 @Configuration
 class AuthorizationServerConfig {
-
-  static final String WALLET_APP_CLIENT_ID = "wallet-app";
-  static final String ACCOUNT_CREATE_SCOPE = "account:create";
 
   private static final Logger log = LoggerFactory.getLogger(AuthorizationServerConfig.class);
 
@@ -54,16 +46,25 @@ class AuthorizationServerConfig {
     return http.build();
   }
 
+  /** No clients yet: sign-in grants register their own clients. */
   @Bean
   RegisteredClientRepository registeredClientRepository() {
-    RegisteredClient walletApp = RegisteredClient.withId(UUID.randomUUID().toString())
-        .clientId(WALLET_APP_CLIENT_ID)
-        .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
-        .authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
-        .scope(ACCOUNT_CREATE_SCOPE)
-        .tokenSettings(TokenSettings.builder().accessTokenTimeToLive(Duration.ofMinutes(5)).build())
-        .build();
-    return new InMemoryRegisteredClientRepository(walletApp);
+    return new RegisteredClientRepository() {
+      @Override
+      public void save(RegisteredClient registeredClient) {
+        throw new UnsupportedOperationException("No client registration");
+      }
+
+      @Override
+      public RegisteredClient findById(String id) {
+        return null;
+      }
+
+      @Override
+      public RegisteredClient findByClientId(String clientId) {
+        return null;
+      }
+    };
   }
 
   @Bean

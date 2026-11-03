@@ -56,8 +56,8 @@ Access tokens are ES256 JWTs. There is no sign-in grant yet.
 
 ## Roadmap
 
-- **Attestation-based client authentication.** The app is currently a public client
-  (`client_id` only, auth method `none`). The goal is
+- **Attestation-based client authentication.** The device-key sign-in starts with the app as
+  a public client (`client_id` only, auth method `none`). The goal is
   [OAuth 2.0 Attestation-Based Client Authentication](https://datatracker.ietf.org/doc/draft-ietf-oauth-attestation-based-client-auth/)
   (`OAuth-Client-Attestation` and `OAuth-Client-Attestation-PoP` headers), the same scheme the
   app uses with the Wallet Instance Attestation towards the PID issuer. Spring Authorization
