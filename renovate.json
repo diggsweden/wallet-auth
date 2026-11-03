@@ -1,0 +1,69 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "local>diggsweden/.github:renovate-base"
+  ],
+  "enabledManagers": [
+    "github-actions",
+    "mise"
+  ],
+  "packageRules": [
+    {
+      "description": "Pin Docker digests for security actions",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "step-security/harden-runner",
+        "ossf/scorecard-action",
+        "github/codeql-action/upload-sarif"
+      ],
+      "pinDigests": true
+    },
+    {
+      "description": "Mise tools - Major updates",
+      "matchManagers": ["mise"],
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["tools", "major-update"],
+      "groupName": "mise major"
+    },
+    {
+      "description": "Mise tools - Non-major updates",
+      "matchManagers": ["mise"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "addLabels": ["tools"],
+      "groupName": "mise non-major"
+    },
+    {
+      "description": "Security and compliance tools",
+      "matchManagers": [
+        "mise"
+      ],
+      "matchPackageNames": [
+        "aqua:zricethezav/gitleaks",
+        "aqua:siderolabs/conform",
+        "aqua:rhysd/actionlint"
+      ],
+      "addLabels": [
+        "security-tools"
+      ],
+      "groupName": "security tools"
+    },
+    {
+      "description": "Documentation and build tools",
+      "matchManagers": [
+        "mise"
+      ],
+      "matchPackageNames": [
+        "aqua:google/yamlfmt",
+        "aqua:rvben/rumdl",
+        "github:italia/publiccode-parser-go",
+        "aqua:casey/just"
+      ],
+      "addLabels": [
+        "documentation"
+      ],
+      "groupName": "documentation tools"
+    }
+  ]
+}

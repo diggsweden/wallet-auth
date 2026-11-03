@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2026 Digg - Agency for Digital Government
+#
+# SPDX-License-Identifier: CC0-1.0
+
+# IDE
+.vscode
+.idea
+
+# Quality tool reports
+megalinter-reports
+mega-linter-reports
+
+# Cache directories
+.mypy_cache
+.ruff_cache
+__pycache__
+
+# Tool version managers
+.mise
+
+# OS files
+.DS_Store
+Thumbs.db
