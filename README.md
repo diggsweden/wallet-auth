@@ -12,6 +12,8 @@ SPDX-License-Identifier: CC0-1.0
 ![Standard for Public Code Commitment](https://img.shields.io/badge/Standard%20for%20Public%20Code%20Commitment-green?style=for-the-badge)
 
 **Description**: Authorization server for the European Digital Identity Wallet ecosystem.
+It authenticates wallet devices and issues access tokens, in the OAuth 2.0 role of
+authorization server.
 
 ## Table of Contents
 
@@ -19,6 +21,7 @@ SPDX-License-Identifier: CC0-1.0
 - [Quick start instructions](#quick-start-instructions)
 - [Usage](#usage)
 - [Known issues](#known-issues)
+- [Roadmap](#roadmap)
 - [Support](#support)
 - [Contributing](#contributing)
 - [License](#license)
@@ -26,19 +29,42 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Installation and Requirements
 
-TODO
+- Java 25
 
 ## Quick start instructions
 
-TODO
+```shell
+./mvnw spring-boot:run
+```
+
+The server starts on port 9000. Without `SIGNING_KEY` (an EC P-256 private JWK) it generates
+an ephemeral signing key.
 
 ## Usage
 
-TODO
+Endpoints:
+
+- `GET /.well-known/oauth-authorization-server` - metadata
+- `GET /oauth2/jwks` - public signing keys
+
+Access tokens are ES256 JWTs. There is no sign-in grant yet.
 
 ## Known issues
 
-None yet.
+- Authorizations are kept in memory, so the server only works as a single instance and
+  forgets everything on restart.
+
+## Roadmap
+
+- **Attestation-based client authentication.** The app is currently a public client
+  (`client_id` only, auth method `none`). The goal is
+  [OAuth 2.0 Attestation-Based Client Authentication](https://datatracker.ietf.org/doc/draft-ietf-oauth-attestation-based-client-auth/)
+  (`OAuth-Client-Attestation` and `OAuth-Client-Attestation-PoP` headers), the same scheme the
+  app uses with the Wallet Instance Attestation towards the PID issuer. Spring Authorization
+  Server has no built-in support, so it needs a custom client authenticator.
+- Sign-in with the device key (`jwt-bearer` plus DPoP), with the key looked up in wallet-account.
+- Account registration with spärrkod; real key attestation and app attestation.
+- Persistent storage (Postgres) and a shared replay cache.
 
 ## Support
 

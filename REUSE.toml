@@ -13,3 +13,13 @@ path = [
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Digg - Agency for Digital Government"
 SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = [
+  "mvnw",
+  "mvnw.cmd",
+  ".mvn/wrapper/maven-wrapper.jar",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Apache Software Foundation (ASF)"
+SPDX-License-Identifier = "Apache-2.0"
