@@ -63,7 +63,7 @@ Access tokens are ES256 JWTs. There is no sign-in grant yet.
   app uses with the Wallet Instance Attestation towards the PID issuer. Spring Authorization
   Server has no built-in support, so it needs a custom client authenticator.
 - Sign-in with the device key (`jwt-bearer` plus DPoP), with the key looked up in wallet-account.
-- Account registration with spärrkod; real key attestation and app attestation.
+- Account registration with a recovery code; real key attestation and app attestation.
 - Persistent storage (Postgres) and a shared replay cache.
 
 ## Support
