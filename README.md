@@ -20,8 +20,6 @@ authorization server.
 - [Installation and Requirements](#installation-and-requirements)
 - [Quick start instructions](#quick-start-instructions)
 - [Usage](#usage)
-- [Known issues](#known-issues)
-- [Roadmap](#roadmap)
 - [Support](#support)
 - [Contributing](#contributing)
 - [License](#license)
@@ -48,23 +46,6 @@ Endpoints:
 - `GET /oauth2/jwks` - public signing keys
 
 Access tokens are ES256 JWTs. There is no sign-in grant yet.
-
-## Known issues
-
-- Authorizations are kept in memory, so the server only works as a single instance and
-  forgets everything on restart.
-
-## Roadmap
-
-- **Attestation-based client authentication.** The device-key sign-in starts with the app as
-  a public client (`client_id` only, auth method `none`). The goal is
-  [OAuth 2.0 Attestation-Based Client Authentication](https://datatracker.ietf.org/doc/draft-ietf-oauth-attestation-based-client-auth/)
-  (`OAuth-Client-Attestation` and `OAuth-Client-Attestation-PoP` headers), the same scheme the
-  app uses with the Wallet Instance Attestation towards the PID issuer. Spring Authorization
-  Server has no built-in support, so it needs a custom client authenticator.
-- Sign-in with the device key (`jwt-bearer` plus DPoP), with the key looked up in wallet-account.
-- Account registration with a recovery code; real key attestation and app attestation.
-- Persistent storage (Postgres) and a shared replay cache.
 
 ## Support
 
