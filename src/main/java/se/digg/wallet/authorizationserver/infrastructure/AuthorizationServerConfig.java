@@ -14,6 +14,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import java.text.ParseException;
+import java.time.Clock;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,11 @@ class AuthorizationServerConfig {
         return null;
       }
     };
+  }
+
+  @Bean
+  Clock clock() {
+    return Clock.systemUTC();
   }
 
   @Bean
