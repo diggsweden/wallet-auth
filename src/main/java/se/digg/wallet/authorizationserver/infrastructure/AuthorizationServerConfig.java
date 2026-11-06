@@ -39,7 +39,8 @@ class AuthorizationServerConfig {
 
   @Bean
   SecurityFilterChain authorizationServerFilterChain(HttpSecurity http) {
-    http.oauth2AuthorizationServer(server -> {})
+    http.oauth2AuthorizationServer(server -> {
+    })
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers("/actuator/health/**").permitAll()
             .anyRequest().authenticated());

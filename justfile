@@ -8,6 +8,7 @@
 devtools_repo := env("DEVBASE_CHECK_REPO", "https://github.com/diggsweden/devbase-check")
 devtools_dir := env("XDG_DATA_HOME", env("HOME") + "/.local/share") + "/devbase-check"
 lint := devtools_dir + "/linters"
+java_lint := devtools_dir + "/linters/java"
 colors := devtools_dir + "/utils/colors.sh"
 
 # Color variables
@@ -60,7 +61,7 @@ setup-devtools:
 # Check required tools are installed
 [group('setup')]
 check-tools: _ensure-devtools
-    @{{devtools_dir}}/scripts/check-tools.sh --check-devtools mise git just rumdl yamlfmt actionlint gitleaks shellcheck shfmt gommitlint reuse
+    @{{devtools_dir}}/scripts/check-tools.sh --check-devtools mise git just java mvn rumdl yamlfmt actionlint gitleaks shellcheck shfmt gommitlint reuse
 
 # Install tools via mise
 [group('setup')]
@@ -71,10 +72,11 @@ tools-install: _ensure-devtools
 # VERIFY - Quality assurance
 # ==================================================================================== #
 
-# Run all checks (linters)
+# Run all checks (linters + tests)
 [group('verify')]
 verify: _ensure-devtools check-tools
     @{{devtools_dir}}/scripts/verify.sh
+    @just test
 
 # ==================================================================================== #
 # LINT - Code quality checks
@@ -140,13 +142,38 @@ lint-xml:
 lint-container:
     @{{lint}}/container.sh
 
+# Lint Java code (all: checkstyle, pmd, spotbugs)
+[group('lint')]
+lint-java:
+    @{{java_lint}}/lint.sh
+
+# Lint Java - checkstyle only
+[group('lint')]
+lint-java-checkstyle:
+    @{{java_lint}}/checkstyle.sh
+
+# Lint Java - pmd only
+[group('lint')]
+lint-java-pmd:
+    @{{java_lint}}/pmd.sh
+
+# Lint Java - spotbugs only
+[group('lint')]
+lint-java-spotbugs:
+    @{{java_lint}}/spotbugs.sh
+
+# Check Java formatting
+[group('lint')]
+lint-java-fmt:
+    @{{java_lint}}/format.sh check
+
 # ==================================================================================== #
 # LINT-FIX - Auto-fix code issues
 # ==================================================================================== #
 
 # ▪ Fix all auto-fixable issues
 [group('lint-fix')]
-lint-fix: _ensure-devtools lint-yaml-fix lint-markdown-fix lint-shell-fmt-fix
+lint-fix: _ensure-devtools lint-yaml-fix lint-markdown-fix lint-shell-fmt-fix lint-java-fmt-fix
     #!/usr/bin/env bash
     source "{{colors}}"
     just_success "All auto-fixes completed"
@@ -165,6 +192,20 @@ lint-markdown-fix:
 [group('lint-fix')]
 lint-shell-fmt-fix:
     @{{lint}}/shell-fmt.sh fix
+
+# Fix Java formatting
+[group('lint-fix')]
+lint-java-fmt-fix:
+    @{{java_lint}}/format.sh fix
+
+# ==================================================================================== #
+# TEST - Run tests
+# ==================================================================================== #
+
+# ▪ Run tests
+[group('test')]
+test:
+    @{{java_lint}}/test.sh
 
 # ==================================================================================== #
 # INTERNAL
