@@ -16,7 +16,6 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    secrets: inherit
     with:
       reusable-ci-ref: d31c989acd139c3e8754e116496c826af8dbbca0
       # This template is documentation/reference - not a buildable project
@@ -30,3 +29,9 @@ jobs:
       linters.licenselint: false
       linters.megalint: false
       # Other linters remain enabled by default
+  test:
+    needs: [pr-checks]
+    if: always()
+    permissions:
+      contents: read
+    uses: ./.github/workflows/test.yml
