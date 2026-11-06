@@ -40,12 +40,36 @@ an ephemeral signing key.
 
 ## Usage
 
-Endpoints:
+The app signs in with its **device key**, a sign-in method of the account. The app gets a
+short-lived access token with scope `wallet`, bound to the device key with DPoP. The server does
+not know about wallets: services that need one find it in wallet-account by `sub` and `cnf.jkt`.
+
+The app sends a [jwt-bearer](https://www.rfc-editor.org/rfc/rfc7523) token request:
+
+```http
+POST /oauth2/token
+Content-Type: application/x-www-form-urlencoded
+DPoP: <DPoP proof signed with the device key>
+
+grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
+&client_id=wallet-app
+&assertion=<ES256 JWT signed with the device key>
+```
+
+The assertion has the device public key in its `jwk` header and the claims `iss` (client id),
+`aud` (issuer), `iat`, `exp` (at most 5 minutes later) and `jti`. The DPoP proof must use the
+same key. The access token is an ES256 JWT with:
+
+- `sub`: the account id
+- `cnf.jkt`: the device key thumbprint
+
+An unknown or suspended device key gets `invalid_grant`. Device keys are kept in memory; there is
+no registration yet.
+
+Other endpoints:
 
 - `GET /.well-known/oauth-authorization-server` - metadata
 - `GET /oauth2/jwks` - public signing keys
-
-Access tokens are ES256 JWTs. There is no sign-in grant yet.
 
 ## Support
 

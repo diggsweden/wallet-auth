@@ -4,6 +4,8 @@
 
 package se.digg.wallet.authorizationserver.application.config;
 
+import static org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationServerMetadataClaimNames.DPOP_SIGNING_ALG_VALUES_SUPPORTED;
+import static org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationServerMetadataClaimNames.GRANT_TYPES_SUPPORTED;
 import static org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationServerMetadataClaimNames.INTROSPECTION_ENDPOINT;
 import static org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationServerMetadataClaimNames.INTROSPECTION_ENDPOINT_AUTH_METHODS_SUPPORTED;
 import static org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationServerMetadataClaimNames.REVOCATION_ENDPOINT;
@@ -12,6 +14,7 @@ import static org.springframework.security.oauth2.server.authorization.OAuth2Aut
 import static org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationServerMetadataClaimNames.TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -38,6 +41,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerMetadataEndpointConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2ClientAuthenticationConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2TokenEndpointConfigurer;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
@@ -51,13 +55,20 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.StringUtils;
+import se.digg.wallet.authorizationserver.application.DeviceKeyGrantAuthenticationConverter;
+import se.digg.wallet.authorizationserver.application.DeviceKeyGrantAuthenticationProvider;
 import se.digg.wallet.authorizationserver.application.PublicClientAuthentication;
+import se.digg.wallet.authorizationserver.domain.AttestationVerifier;
+import se.digg.wallet.authorizationserver.domain.DeviceKeyCredentials;
+import se.digg.wallet.authorizationserver.domain.DeviceKeySignIn;
+import se.digg.wallet.authorizationserver.domain.ReplayCache;
 
 @Configuration
 class AuthorizationServerConfig {
@@ -69,9 +80,12 @@ class AuthorizationServerConfig {
 
   @Bean
   SecurityFilterChain authorizationServerFilterChain(HttpSecurity http,
-      RegisteredClientRepository clients, AuthorizationServerSettings settings) {
+      RegisteredClientRepository clients, OAuth2AuthorizationService authorizationService,
+      DeviceKeySignIn deviceKeySignIn, AuthorizationServerSettings settings) {
     http.oauth2AuthorizationServer(server -> server
         .clientAuthentication(clientAuth -> allowPublicClients(clientAuth, clients))
+        .tokenEndpoint(token -> acceptDeviceKeyGrant(token, http, authorizationService,
+            deviceKeySignIn))
         .authorizationServerMetadataEndpoint(AuthorizationServerConfig::advertiseOnlySupported))
         // Spring cannot switch these endpoints off: tokens are verified against JWKS instead.
         .addFilterBefore(notFound(settings.getTokenRevocationEndpoint(),
@@ -89,12 +103,24 @@ class AuthorizationServerConfig {
         .authenticationProvider(new PublicClientAuthentication.Provider(clients));
   }
 
+  private static void acceptDeviceKeyGrant(OAuth2TokenEndpointConfigurer token, HttpSecurity http,
+      OAuth2AuthorizationService authorizationService, DeviceKeySignIn deviceKeySignIn) {
+    token
+        .accessTokenRequestConverter(new DeviceKeyGrantAuthenticationConverter())
+        // The shared token generator exists once the default providers are created.
+        .authenticationProviders(providers -> providers.addFirst(
+            new DeviceKeyGrantAuthenticationProvider(authorizationService,
+                http.getSharedObject(OAuth2TokenGenerator.class), deviceKeySignIn)));
+  }
+
   /** Spring's defaults advertise every grant and endpoint; keep only what we support. */
   private static void advertiseOnlySupported(
       OAuth2AuthorizationServerMetadataEndpointConfigurer metadata) {
     metadata.authorizationServerMetadataCustomizer(builder -> builder.claims(claims -> {
+      claims.put(GRANT_TYPES_SUPPORTED, List.of(AuthorizationGrantType.JWT_BEARER.getValue()));
       claims.put(TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED,
           List.of(ClientAuthenticationMethod.NONE.getValue()));
+      claims.put(DPOP_SIGNING_ALG_VALUES_SUPPORTED, List.of(JWSAlgorithm.ES256.getName()));
       removeUnsupported(claims);
     }));
   }
@@ -116,6 +142,12 @@ class AuthorizationServerConfig {
       }
       chain.doFilter(request, response);
     };
+  }
+
+  @Bean
+  DeviceKeySignIn deviceKeySignIn(DeviceKeyCredentials deviceKeyCredentials,
+      AttestationVerifier attestationVerifier, ReplayCache replayCache, Clock clock) {
+    return new DeviceKeySignIn(deviceKeyCredentials, attestationVerifier, replayCache, clock);
   }
 
   @Bean

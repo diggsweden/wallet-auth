@@ -50,8 +50,19 @@ class MetadataAndJwksComponentTest {
     }
 
     @Test
+    void advertises_only_the_jwt_bearer_grant() {
+      assertThat(metadata).containsEntry("grant_types_supported",
+          List.of("urn:ietf:params:oauth:grant-type:jwt-bearer"));
+    }
+
+    @Test
     void advertises_only_public_clients() {
       assertThat(metadata).containsEntry("token_endpoint_auth_methods_supported", List.of("none"));
+    }
+
+    @Test
+    void advertises_es256_for_dpop() {
+      assertThat(metadata).containsEntry("dpop_signing_alg_values_supported", List.of("ES256"));
     }
 
     @Test
