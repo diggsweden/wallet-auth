@@ -45,8 +45,6 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.ser
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
-import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -80,12 +78,11 @@ class AuthorizationServerConfig {
 
   @Bean
   SecurityFilterChain authorizationServerFilterChain(HttpSecurity http,
-      RegisteredClientRepository clients, OAuth2AuthorizationService authorizationService,
-      DeviceKeySignIn deviceKeySignIn, AuthorizationServerSettings settings) {
+      RegisteredClientRepository clients, DeviceKeySignIn deviceKeySignIn,
+      AuthorizationServerSettings settings) {
     http.oauth2AuthorizationServer(server -> server
         .clientAuthentication(clientAuth -> allowPublicClients(clientAuth, clients))
-        .tokenEndpoint(token -> acceptDeviceKeyGrant(token, http, authorizationService,
-            deviceKeySignIn))
+        .tokenEndpoint(token -> acceptDeviceKeyGrant(token, http, deviceKeySignIn))
         .authorizationServerMetadataEndpoint(AuthorizationServerConfig::advertiseOnlySupported))
         // Spring cannot switch these endpoints off: tokens are verified against JWKS instead.
         .addFilterBefore(notFound(settings.getTokenRevocationEndpoint(),
@@ -104,12 +101,12 @@ class AuthorizationServerConfig {
   }
 
   private static void acceptDeviceKeyGrant(OAuth2TokenEndpointConfigurer token, HttpSecurity http,
-      OAuth2AuthorizationService authorizationService, DeviceKeySignIn deviceKeySignIn) {
+      DeviceKeySignIn deviceKeySignIn) {
     token
         .accessTokenRequestConverter(new DeviceKeyGrantAuthenticationConverter())
         // The shared token generator exists once the default providers are created.
         .authenticationProviders(providers -> providers.addFirst(
-            new DeviceKeyGrantAuthenticationProvider(authorizationService,
+            new DeviceKeyGrantAuthenticationProvider(
                 http.getSharedObject(OAuth2TokenGenerator.class), deviceKeySignIn)));
   }
 
@@ -165,11 +162,6 @@ class AuthorizationServerConfig {
         .tokenSettings(TokenSettings.builder().accessTokenTimeToLive(Duration.ofMinutes(5)).build())
         .build();
     return new InMemoryRegisteredClientRepository(walletApp);
-  }
-
-  @Bean
-  OAuth2AuthorizationService authorizationService() {
-    return new InMemoryOAuth2AuthorizationService();
   }
 
   @Bean

@@ -17,8 +17,6 @@ import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.jwt.DPoPProofContext;
 import org.springframework.security.oauth2.jwt.DPoPProofJwtDecoderFactory;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AccessTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
@@ -40,14 +38,12 @@ import se.digg.wallet.authorizationserver.domain.SignInRejectedException;
  */
 public class DeviceKeyGrantAuthenticationProvider implements AuthenticationProvider {
 
-  private final OAuth2AuthorizationService authorizationService;
   private final OAuth2TokenGenerator<?> tokenGenerator;
   private final DeviceKeySignIn deviceKeySignIn;
   private final DPoPProofJwtDecoderFactory dpopDecoderFactory = new DPoPProofJwtDecoderFactory();
 
-  public DeviceKeyGrantAuthenticationProvider(OAuth2AuthorizationService authorizationService,
-      OAuth2TokenGenerator<?> tokenGenerator, DeviceKeySignIn deviceKeySignIn) {
-    this.authorizationService = authorizationService;
+  public DeviceKeyGrantAuthenticationProvider(OAuth2TokenGenerator<?> tokenGenerator,
+      DeviceKeySignIn deviceKeySignIn) {
     this.tokenGenerator = tokenGenerator;
     this.deviceKeySignIn = deviceKeySignIn;
   }
@@ -135,16 +131,8 @@ public class DeviceKeyGrantAuthenticationProvider implements AuthenticationProvi
       RegisteredClient client, DeviceKey deviceKey, Set<String> scopes, Jwt dpopProof) {
     String accountId = deviceKey.accountId().toString();
     Jwt jwt = generateJwt(request, client, accountId, scopes, dpopProof);
-    OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.DPOP,
-        jwt.getTokenValue(), jwt.getIssuedAt(), jwt.getExpiresAt(), scopes);
-    authorizationService.save(OAuth2Authorization.withRegisteredClient(client)
-        .principalName(accountId)
-        .authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
-        .authorizedScopes(scopes)
-        .token(accessToken, metadata -> metadata
-            .put(OAuth2Authorization.Token.CLAIMS_METADATA_NAME, jwt.getClaims()))
-        .build());
-    return accessToken;
+    return new OAuth2AccessToken(OAuth2AccessToken.TokenType.DPOP, jwt.getTokenValue(),
+        jwt.getIssuedAt(), jwt.getExpiresAt(), scopes);
   }
 
   private Jwt generateJwt(DeviceKeyGrantAuthenticationToken request, RegisteredClient client,
