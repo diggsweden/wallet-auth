@@ -20,6 +20,7 @@ authorization server.
 - [Installation and Requirements](#installation-and-requirements)
 - [Quick start instructions](#quick-start-instructions)
 - [Usage](#usage)
+- [Device key sign-in](#device-key-sign-in)
 - [Support](#support)
 - [Contributing](#contributing)
 - [License](#license)
@@ -70,6 +71,46 @@ Other endpoints:
 
 - `GET /.well-known/oauth-authorization-server` - metadata
 - `GET /oauth2/jwks` - public signing keys
+
+## Device key sign-in
+
+A token request passes Spring Authorization Server's two steps: client authentication, then the
+grant. The application layer turns HTTP and JOSE input into checked types; the sign-in rules are in
+the domain layer.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant App
+    box Application layer
+        participant Client as PublicClientAuthentication
+        participant Converter as DeviceKeyGrantAuthenticationConverter
+        participant Provider as DeviceKeyGrantAuthenticationProvider
+        participant Parser as DeviceKeyAssertionParser
+    end
+    box Domain layer
+        participant SignIn as DeviceKeySignIn
+    end
+
+    App->>Client: POST /oauth2/token (client_id, assertion, DPoP)
+    Client->>Client: wallet-app registered with auth method none?
+    Client->>Converter: authenticated client
+    Converter->>Provider: DeviceKeyGrantAuthenticationToken
+    Provider->>Provider: client may use jwt-bearer, scopes allowed, verify DPoP proof
+    Provider->>Parser: assertion
+    Parser-->>Provider: DeviceKeyAssertion (signature verified)
+    Provider->>SignIn: assertion, DPoP key thumbprint
+    SignIn->>SignIn: valid claims, same key as DPoP, trusted device,<br/>active device key, assertion not used before
+    SignIn-->>Provider: DeviceKey (account id)
+    Provider-->>App: DPoP-bound access token (sub, cnf.jkt)
+```
+
+- A failed client check gives `invalid_client`, a rejected sign-in `invalid_grant`.
+- Issued tokens are not stored: there is no refresh, introspection or revocation, and resource
+  servers verify tokens against the JWKS.
+- The domain reaches device keys, attestation and replay protection through the interfaces
+  `DeviceKeyCredentials`, `AttestationVerifier` and `ReplayCache`. Their implementations in
+  `infrastructure` are interim: in memory, and attestation is not verified yet.
 
 ## Support
 
