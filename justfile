@@ -208,6 +208,27 @@ test:
     @{{java_lint}}/test.sh
 
 # ==================================================================================== #
+# DEBUG - Attach a debugger on localhost:5005
+# ==================================================================================== #
+
+# Run tests, waiting for a debugger before they start (e.g. just debug-test 'DeviceKeySignInTest')
+[group('debug')]
+debug-test test:
+    ./mvnw -Dmaven.surefire.debug test -Dtest='{{test}}'
+
+# Run the server in the dev profile with a debug port open, trusting the device key in dev/token
+[group('debug')]
+run-debug:
+    ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev \
+        -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=localhost:5005" \
+        -Dspring-boot.run.arguments="--wallet.authorization-server.dev.device-key-thumbprints=$(cd dev/token && go run . -thumbprint)"
+
+# Sign in to a server started with run-debug and show the access token
+[group('debug')]
+token issuer="http://localhost:9000":
+    cd dev/token && go run . {{issuer}}
+
+# ==================================================================================== #
 # INTERNAL
 # ==================================================================================== #
 

@@ -24,3 +24,6 @@ Thumbs.db
 
 # Build output
 target/
+
+# Local dev device key
+dev/token/device-key.pem

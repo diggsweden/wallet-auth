@@ -17,7 +17,7 @@ public class InMemoryDeviceKeyCredentials implements DeviceKeyCredentials {
 
   private final Map<String, DeviceKey> deviceKeys = new ConcurrentHashMap<>();
 
-  /** Adds a device key. Until registration exists, only tests add keys. */
+  /** Adds a device key. Until registration exists, only tests and the dev profile add keys. */
   public void add(DeviceKey deviceKey) {
     deviceKeys.put(deviceKey.thumbprint(), deviceKey);
   }
