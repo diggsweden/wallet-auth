@@ -64,6 +64,11 @@ same key. The access token is an ES256 JWT with:
 - `sub`: the account id
 - `cnf.jkt`: the device key thumbprint
 
+The DPoP proof is accepted if its `iat` is within 30 seconds of the server clock, and its `jti`
+has not been used before. The proof's freshness relies on the app's clock. A server-provided
+`DPoP-Nonce` ([RFC 9449, section 8](https://www.rfc-editor.org/rfc/rfc9449#section-8)) would add
+protection against proofs created ahead of time, but is not supported yet.
+
 An unknown or suspended device key gets `invalid_grant`. Device keys are kept in memory; there is
 no registration yet.
 
