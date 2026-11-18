@@ -37,3 +37,4 @@ java = "temurin-25"
 "pipx:reuse" = "6.2.0"
 "aqua:koalaman/shellcheck" = "v0.10.0"
 "aqua:mvdan/sh" = "v3.11.0"  # shfmt
+"aqua:gittuf/gittuf" = "0.17.0"

@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2026 Digg - Agency for Digital Government
+#
+# SPDX-License-Identifier: CC0-1.0
+name: gittuf verify
+on: # yamllint disable-line rule:truthy
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+      - uses: gittuf/gittuf-installer@4ecbb57b40e6eb6beaba120dcbef46123b0249e0 # v0.17.0
+        with:
+          gittuf-version: 0.17.0
+      - name: Fetch gittuf metadata
+        run: git fetch origin 'refs/gittuf/*:refs/gittuf/*'
+      - name: Verify main against gittuf policy
+        run: gittuf verify-ref main --verbose
