@@ -76,6 +76,11 @@ protection against proofs created ahead of time, but is not supported yet.
 An unknown or suspended device key gets `invalid_grant`. Device keys are kept in memory; there is
 no registration yet.
 
+For development and test environments, `WALLET_AUTHORIZATIONSERVER_DEV_DEVICEKEYTHUMBPRINTS` (a
+comma-separated list of RFC 7638 device key thumbprints) registers those keys as active at startup.
+The account id is derived from the thumbprint, so it stays the same across restarts. It is empty by
+default and must not be set in production.
+
 Other endpoints:
 
 - `GET /.well-known/oauth-authorization-server` - metadata
