@@ -8,6 +8,7 @@ version = 1
 path = [
   ".github/pull_request_template.md",
   "renovate.json",
+  "CHANGELOG.md",
   ".gommitlint.yaml",
   "development/sast/pmd_default_java.xml",
 ]
