@@ -15,6 +15,9 @@ SPDX-License-Identifier: CC0-1.0
 It authenticates wallet devices and issues access tokens, in the OAuth 2.0 role of
 authorization server.
 
+**Status**: In development, not for production use. Device keys are kept in memory and device
+attestation is not verified yet.
+
 ## Table of Contents
 
 - [Installation and Requirements](#installation-and-requirements)
@@ -43,7 +46,8 @@ an ephemeral signing key.
 
 The app signs in with its **device key**, a sign-in method of the account. The app gets a
 short-lived access token with scope `wallet`, bound to the device key with DPoP. The server does
-not know about wallets: services that need one find it in wallet-account by `sub` and `cnf.jkt`.
+not know about wallets: services that need one find it in
+[wallet-account](https://github.com/diggsweden/wallet-account) by `sub` and `cnf.jkt`.
 
 The app sends a [jwt-bearer](https://www.rfc-editor.org/rfc/rfc7523) token request:
 
