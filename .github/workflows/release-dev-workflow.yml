@@ -15,9 +15,6 @@ jobs:
     secrets: inherit
     with:
       reusable-ci-ref: d31c989acd139c3e8754e116496c826af8dbbca0
-      # This template is documentation/reference - not a buildable project
-      # Projects using this template should set their actual type:
-      # maven, npm, gradle, python
       project-type: maven
       container-file: Containerfile
       working-directory: .

@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-# Quality checks and automation for Open Source Project Template
+# Quality checks and automation for Wallet Authorization Server
 # Run 'just' to see available commands
 
 devtools_repo := env("DEVBASE_CHECK_REPO", "https://github.com/diggsweden/devbase-check")
@@ -23,7 +23,7 @@ NC := "\\033[0m"
 
 # Display available recipes
 default:
-    @printf "{{CYAN_BOLD}} Open Source Project Template{{NC}}\n\n"
+    @printf "{{CYAN_BOLD}} Wallet Authorization Server{{NC}}\n\n"
     @printf "Quick start: {{GREEN}}just setup-devtools{{NC}} | {{BLUE}}just verify{{NC}}\n\n"
     @just --list --unsorted
 

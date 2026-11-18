@@ -18,9 +18,6 @@ jobs:
       security-events: write
     with:
       reusable-ci-ref: d31c989acd139c3e8754e116496c826af8dbbca0
-      # This template is documentation/reference - not a buildable project
-      # Projects using this template should set their actual type:
-      # maven, npm, gradle, python, go, rust
       project-type: maven
       # Use just+mise-based linting (lightweight, uses .mise.toml + justfile)
       linters.devbasecheck: true
